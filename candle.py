@@ -34,6 +34,6 @@ if __name__ == "__main__":
     print()
 
     while game.is_running:
-        print(game.current_status)
+        print(game.get_status())
         game.respond_to_user_input(input(PROMPT))
         print("\n \n")

@@ -1,4 +1,25 @@
-class Room:
+class Event:
+    message = ""
+
+    def __init__(self, message):
+        self.message = message
+
+
+class Sender:
+    receivers = None
+
+    def __init__(self):
+        self.receivers = set()
+
+    def send(self, event):
+        for receiver in self.receivers:
+            receiver.receive(event)
+
+    def add_receiver(self, receiver):
+        self.receivers.add(receiver)
+
+
+class Room(Sender):
     name = ""  # name must be fewer than 20 chars long
     description = ""
     exits = None
@@ -6,6 +27,7 @@ class Room:
     name_string = None
 
     def __init__(self, name="", description=""):
+        super().__init__()
         self.name = name
         # TODO: validate name length < 20
         self.description = description
@@ -14,9 +36,12 @@ class Room:
 
     # TODO: test init
 
-
     def __str__(self):
         return self.description
+
+    def visit(self):
+        self.send(Event(self.describe()))
+        self.is_discovered = True
 
     def connect(self, room, direction):
         self.exits[direction] = room

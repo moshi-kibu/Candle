@@ -1,6 +1,4 @@
-from collections import OrderedDict
 from random import sample
-
 from models import Room
 
 DIRECTIONS = ['North', 'South', 'East', 'West', 'N', 'S', 'E', 'W']
@@ -16,13 +14,19 @@ def _choose_random_direction():
 
 class Game:
     current_location = None
-    rooms = []
+    rooms = None
     is_running = False
     coordinate_map = None
     current_coordinate = (0, 0)
+    current_status = ""
+    events = None
 
     def __init__(self, rooms, direction_strategy=_choose_random_direction):
+        self.events = []
+
         self.rooms = rooms
+        for room in rooms:
+            room.add_receiver(self)
         self.current_location = rooms[0]
 
         # needed to prevent first room from being self-connected
@@ -30,9 +34,19 @@ class Game:
 
         self.make_map(direction_strategy)
         self.current_location = rooms[0]
-        self.current_status = self.current_location.describe()
-        self.current_location.is_discovered = True
+        self.current_location.visit()
         self.is_running = True
+
+    def receive(self, event):
+        self.events.append(event)
+
+    def get_status(self):
+        status = self.current_status
+        for event in self.events:
+            status += event.message + "\n"
+        self.current_status = ""
+        self.events = []
+        return status
 
     def _stop(self):
         self.is_running = False
@@ -51,7 +65,7 @@ class Game:
             self.move(user_input)
         elif user_input in ["Look", "L"]:
             self.current_location.is_discovered = False
-            self.current_status = self.current_location.describe()
+            self.current_location.visit()
         elif user_input in ["Map", "M"]:
             self.print_map()
         elif user_input == "Exit":
@@ -63,8 +77,7 @@ class Game:
         try:
             self.current_status = "You move to the " + direction + ".\n"
             self.current_location = self.current_location.exits[direction]
-            self.current_status += self.current_location.describe()
-            self.current_location.is_discovered = True
+            self.current_location.visit()
         except KeyError:  # no exit this way
             self.current_status = "There's no exit that way, dorkface."
 
@@ -91,8 +104,7 @@ class Game:
         # room_width = max([len(r.name) for r in self.rooms])
         top_line = ["|" + ("_" * 20) + ""]
         empty_line = ["|" + (" " * 20) + ""]
-        bottom_line = ["|" + ("_" * 20) + ""]
-        map = []
+        room_map = []
         for y in reversed(range(-6, 7)):
             row = []
             for x in range(-6, 7):
@@ -101,14 +113,15 @@ class Game:
                     row.append(room.name_string)
                 else:
                     row.append("|" + (" " * 20) + "")
-            map.append(row)
-        for row in map:
-            print("".join(top_line * len(map)))
-            print("".join(empty_line * len(map)))
+            room_map.append(row)
+        for row in room_map:
+            print("".join(top_line * len(room_map)))
+            print("".join(empty_line * len(room_map)))
             print("".join(row))
             # print("".join(bottom_line * len(map)))
 
-    def _shift_coordinates(self, current_coordinate, direction):
+    @staticmethod
+    def _shift_coordinates(current_coordinate, direction):
         if direction == "North":
             coordinates = (current_coordinate[0], current_coordinate[1] + 1)
         elif direction == "South":
