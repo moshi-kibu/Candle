@@ -34,6 +34,7 @@ class Room(Sender):
         self.exits = {}
         self._make_pretty_box()
 
+
     # TODO: test init
 
     def __str__(self):
@@ -81,3 +82,24 @@ class Room(Sender):
             strings.append('You are back in the {}.'.format(self.name))
         strings += ['There is an exit to the {}.'.format(k) for k in self.exits.keys()]
         return '\n'.join(strings)
+
+
+class Player(Sender):
+    location = None
+
+    def __init__(self, location):
+        super().__init__()
+        self.location = location
+        self.location.visit()
+
+    def move(self, direction):
+        try:
+            self.location = self.location.exits[direction]
+            self.send(Event("You move to the " + direction + "."))
+            self.location.visit()
+        except KeyError:  # no exit this way
+            self.send(Event("There's no exit that way, dorkface."))
+
+    def look(self):
+        self.location.is_discovered = False
+        self.location.visit()

@@ -1,8 +1,7 @@
 from random import sample
-from models import Room
+from models import Room, Player
 
 DIRECTIONS = ['North', 'South', 'East', 'West', 'N', 'S', 'E', 'W']
-
 
 def _choose_random_direction():
     # a randomized direction strategy
@@ -13,12 +12,10 @@ def _choose_random_direction():
 
 
 class Game:
-    current_location = None
     rooms = None
     is_running = False
     coordinate_map = None
     current_coordinate = (0, 0)
-    current_status = ""
     events = None
 
     def __init__(self, rooms, direction_strategy=_choose_random_direction):
@@ -27,29 +24,23 @@ class Game:
         self.rooms = rooms
         for room in rooms:
             room.add_receiver(self)
-        self.current_location = rooms[0]
 
         # needed to prevent first room from being self-connected
-        self.coordinate_map = {(0, 0): self.current_location}
-
+        self.coordinate_map = {(0, 0): rooms[0]}
         self.make_map(direction_strategy)
-        self.current_location = rooms[0]
-        self.current_location.visit()
+        self.player = Player(rooms[0])
+        self.player.add_receiver(self)
         self.is_running = True
 
     def receive(self, event):
         self.events.append(event)
 
     def get_status(self):
-        status = self.current_status
+        status = ""
         for event in self.events:
             status += event.message + "\n"
-        self.current_status = ""
         self.events = []
         return status
-
-    def _stop(self):
-        self.is_running = False
 
     def respond_to_user_input(self, user_input):
         user_input = user_input.capitalize()
@@ -62,10 +53,9 @@ class Game:
                 user_input = "East"
             elif user_input == "W":
                 user_input = "West"
-            self.move(user_input)
+            self.player.move(user_input)
         elif user_input in ["Look", "L"]:
-            self.current_location.is_discovered = False
-            self.current_location.visit()
+            self.player.look()
         elif user_input in ["Map", "M"]:
             self.print_map()
         elif user_input == "Exit":
@@ -73,17 +63,10 @@ class Game:
         else:
             print("sorry, there is no such action")
 
-    def move(self, direction):
-        try:
-            self.current_status = "You move to the " + direction + ".\n"
-            self.current_location = self.current_location.exits[direction]
-            self.current_location.visit()
-        except KeyError:  # no exit this way
-            self.current_status = "There's no exit that way, dorkface."
-
     def make_map(self, direction_strategy):
         rooms = self.rooms[1:]
         current_coordinate = (0, 0)
+        current_location = self.coordinate_map[current_coordinate]
 
         while len(rooms) != 0:
             room = rooms[0]
@@ -91,17 +74,16 @@ class Game:
             coordinates = self._shift_coordinates(current_coordinate, direction)
             if coordinates in self.coordinate_map:
                 # connect current room to existing room; don't throw away new room
-                self.current_location.connect(self.coordinate_map[coordinates], direction)
+                current_location.connect(self.coordinate_map[coordinates], direction)
             else:
                 # connect current room to room in loop, adds new room to map, moves to room
                 self.coordinate_map[coordinates] = room
-                self.current_location.connect(room, direction)
-                self.current_location = self.current_location.exits[direction]
+                current_location.connect(room, direction)
+                current_location = current_location.exits[direction]
                 current_coordinate = coordinates
                 del rooms[0]
 
     def print_map(self):
-        # room_width = max([len(r.name) for r in self.rooms])
         top_line = ["|" + ("_" * 20) + ""]
         empty_line = ["|" + (" " * 20) + ""]
         room_map = []
@@ -131,3 +113,6 @@ class Game:
         else:
             coordinates = (current_coordinate[0] - 1, current_coordinate[1])
         return coordinates
+
+    def _stop(self):
+        self.is_running = False
