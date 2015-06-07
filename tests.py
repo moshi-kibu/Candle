@@ -1,6 +1,8 @@
 from collections import OrderedDict
 from unittest import TestCase
-from game import Room, Game
+from game import Game
+from models import Room
+
 
 class RoomTests(TestCase):
     def test_single_room_no_exits(self):
@@ -54,15 +56,6 @@ class GameTests(TestCase):
         game.move("North")
         self.assertEquals(game.current_location,room_two)
 
-    def test_move_bad_direction(self):
-        rooms = ["test room 1", "test room 2"]
-        room_one = Room(rooms[0])
-        room_two = Room(rooms[1])
-        game = Game([room_one, room_two], _test_strategy)
-        self.assertEquals(game.current_location,room_one)
-        with self.assertRaises(ValueError):
-            game.move("invalid")
-
     def test_two_room_exits(self):
         rooms = ["test room 1", "test room 2"]
         room_one = Room(rooms[0])
@@ -101,6 +94,6 @@ class GameTests(TestCase):
         self.assertEquals(game.current_location, room_two)
 
 # TODO: Test print_map
-# TODO: Test print_map and only show discovered rooms
+        # TODO: Test print_map and only show is_discovered rooms
 # TODO: Test get_status
 # TODO: Test parse_user_input
