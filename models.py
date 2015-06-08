@@ -11,11 +11,11 @@ class Sender:
     def __init__(self):
         self.receivers = set()
 
-    def send(self, event):
+    def send(self, event):  # TODO: Test this
         for receiver in self.receivers:
             receiver.receive(event)
 
-    def add_receiver(self, receiver):
+    def add_receiver(self, receiver):  #TODO: Test this
         self.receivers.add(receiver)
 
 
@@ -26,7 +26,7 @@ class Room(Sender):
     is_discovered = False
     name_string = None
 
-    def __init__(self, name="", description=""):
+    def __init__(self, name="", description=""):  # TODO: test init
         super().__init__()
         self.name = name
         # TODO: validate name length < 20
@@ -34,17 +34,14 @@ class Room(Sender):
         self.exits = {}
         self._make_pretty_box()
 
-
-    # TODO: test init
-
     def __str__(self):
         return self.description
 
-    def visit(self):
+    def visit(self):  #TODO: test this
         self.send(Event(self.describe()))
         self.is_discovered = True
 
-    def connect(self, room, direction):
+    def connect(self, room, direction):  #TODO test this
         self.exits[direction] = room
         if direction == "North":
             opposite_direction = "South"
@@ -74,7 +71,7 @@ class Room(Sender):
         box_name_line = side_line + (" " * first_offset) + self.name + (" " * second_offset) + ""
         self.name_string = box_name_line
 
-    def describe(self):
+    def describe(self):  #TODO: test this
         strings = []
         if not self.is_discovered:
             strings.append(self.description)
@@ -92,7 +89,7 @@ class Player(Sender):
         self.location = location
         self.location.visit()
 
-    def move(self, direction):
+    def move(self, direction):  #TODO: fix breaking tests on this
         try:
             self.location = self.location.exits[direction]
             self.send(Event("You move to the " + direction + "."))
@@ -100,6 +97,6 @@ class Player(Sender):
         except KeyError:  # no exit this way
             self.send(Event("There's no exit that way, dorkface."))
 
-    def look(self):
+    def look(self):  #TODO: test this
         self.location.is_discovered = False
         self.location.visit()
