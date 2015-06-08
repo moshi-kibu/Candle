@@ -9,6 +9,7 @@ def _choose_random_direction():
     # Ensures: returns one of the strings at random - "North", "South", "East", or "West"
     return sample(["North", "South", "East", "West"], 1)[0]
 
+
 class Game:
     rooms = None
     is_running = False
@@ -75,6 +76,28 @@ class Game:
         else:
             print("sorry, there is no such action")
 
+    def print_map(self):  # TODO: make this return instead?
+        # Requires: make_map must have already been called.
+        # Ensures:
+        # creates a printed map to the command line.
+        # resulting map shows only those rooms which have been discovered by the player
+        top_line = ["|" + ("_" * 20) + ""]
+        empty_line = ["|" + (" " * 20) + ""]
+        room_map = []
+        for y in reversed(range(-6, 7)):
+            row = []
+            for x in range(-6, 7):
+                room = self.coordinate_map.get((x, y), Room("weird thing"))
+                if room.is_discovered:
+                    row.append(room.name_string)
+                else:
+                    row.append("|" + (" " * 20) + "")
+            room_map.append(row)
+        for row in room_map:
+            print("".join(top_line * len(room_map)))
+            print("".join(empty_line * len(room_map)))
+            print("".join(row))
+
     def _make_map(self, direction_strategy):
         # Requires: a direction strategy to use in assigning room directions and exits
         # Ensures:
@@ -103,27 +126,10 @@ class Game:
                 current_coordinate = coordinates
                 del rooms[0]
 
-    def print_map(self):  # TODO: make this return instead?
-        # Requires: make_map must have already been called.
-        # Ensures:
-        # creates a printed map to the command line.
-        # resulting map shows only those rooms which have been discovered by the player
-        top_line = ["|" + ("_" * 20) + ""]
-        empty_line = ["|" + (" " * 20) + ""]
-        room_map = []
-        for y in reversed(range(-6, 7)):
-            row = []
-            for x in range(-6, 7):
-                room = self.coordinate_map.get((x, y), Room("weird thing"))
-                if room.is_discovered:
-                    row.append(room.name_string)
-                else:
-                    row.append("|" + (" " * 20) + "")
-            room_map.append(row)
-        for row in room_map:
-            print("".join(top_line * len(room_map)))
-            print("".join(empty_line * len(room_map)))
-            print("".join(row))
+    def _stop(self):
+        # Requires: N/A
+        # Ensures: re-assignment of is_running instance variable to False
+        self.is_running = False
 
     @staticmethod
     def _shift_coordinates(current_coordinate, direction):
@@ -142,8 +148,3 @@ class Game:
         else:
             coordinates = (current_coordinate[0] - 1, current_coordinate[1])
         return coordinates
-
-    def _stop(self):
-        # Requires: N/A
-        # Ensures: re-assignment of is_running instance variable to False
-        self.is_running = False

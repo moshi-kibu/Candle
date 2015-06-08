@@ -15,7 +15,7 @@ class Sender:
         for receiver in self.receivers:
             receiver.receive(event)
 
-    def add_receiver(self, receiver):  #TODO: Test this
+    def add_receiver(self, receiver):  # TODO: Test this
         self.receivers.add(receiver)
 
 
@@ -32,16 +32,16 @@ class Room(Sender):
         # TODO: validate name length < 20
         self.description = description
         self.exits = {}
-        self._make_pretty_box()
+        self._make_room_map_title_line()
 
     def __str__(self):
         return self.description
 
-    def visit(self):  #TODO: test this
+    def visit(self):  # TODO: test this
         self.send(Event(self.describe()))
         self.is_discovered = True
 
-    def connect(self, room, direction):  #TODO test this
+    def connect(self, room, direction):  # TODO test this
         self.exits[direction] = room
         if direction == "North":
             opposite_direction = "South"
@@ -55,7 +55,16 @@ class Room(Sender):
             raise ValueError('invalid direction')
         room.exits[opposite_direction] = self
 
-    def _make_pretty_box(self):
+    def describe(self):  # TODO: test this
+        strings = []
+        if not self.is_discovered:
+            strings.append(self.description)
+        else:
+            strings.append('You are back in the {}.'.format(self.name))
+        strings += ['There is an exit to the {}.'.format(k) for k in self.exits.keys()]
+        return '\n'.join(strings)
+
+    def _make_room_map_title_line(self):
         box_width = 20  # this is/will be a constraint set on the name of the room class
         offset = box_width - len(self.name)
         side_line = "|"
@@ -71,15 +80,6 @@ class Room(Sender):
         box_name_line = side_line + (" " * first_offset) + self.name + (" " * second_offset) + ""
         self.name_string = box_name_line
 
-    def describe(self):  #TODO: test this
-        strings = []
-        if not self.is_discovered:
-            strings.append(self.description)
-        else:
-            strings.append('You are back in the {}.'.format(self.name))
-        strings += ['There is an exit to the {}.'.format(k) for k in self.exits.keys()]
-        return '\n'.join(strings)
-
 
 class Player(Sender):
     location = None
@@ -89,7 +89,7 @@ class Player(Sender):
         self.location = location
         self.location.visit()
 
-    def move(self, direction):  #TODO: fix breaking tests on this
+    def move(self, direction):  # TODO: fix breaking tests on this
         try:
             self.location = self.location.exits[direction]
             self.send(Event("You move to the " + direction + "."))
@@ -97,6 +97,6 @@ class Player(Sender):
         except KeyError:  # no exit this way
             self.send(Event("There's no exit that way, dorkface."))
 
-    def look(self):  #TODO: test this
+    def look(self):  # TODO: test this
         self.location.is_discovered = False
         self.location.visit()
