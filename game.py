@@ -32,6 +32,7 @@ class Game:
         self._make_map(direction_strategy)
         self.player = Player(rooms[0])
         self.player.add_receiver(self)
+        self.player.options()
         self.is_running = True
 
     def receive(self, event):

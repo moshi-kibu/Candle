@@ -143,9 +143,9 @@ class Player(Sender):
         self.location.is_discovered = False
         self.location.visit()
 
-    def options(self):  # TODO: test this
+    def options(self):  # TODO: test this and document
         message = "You can move by entering the name of a direction, or its first letter. \n" \
                   "You can view the map by typing map or m. \n" \
                   "You can look by typing look or l. \n" \
-                  "You can see these options again by typing options or o."
+                  "You can see these options again by typing options or o.\n"
         self.send(Event(message))

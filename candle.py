@@ -4,11 +4,8 @@ from models import Room
 
 TITLE = "== Candle =="
 INTRO = "You find yourself all alone in the beautiful but exceedingly creepy old mansion \nwith nothing but a candle for company. " \
-        "The tiny flame is barely enough to push back \nthe dark but you think that your eyes are adjusting. \n \n" \
-        "You can move by entering the name of a direction, or its first letter. \n" \
-        "You can view the map by typing map or m. \n" \
-        "You can look by typing look or l. \n" \
-        "You can see these options again by typing options or o."
+        "The tiny flame is barely enough to push back \nthe dark but you think that your eyes are adjusting."
+
 PROMPT = "What would you like to do? \n>"
 rooms = OrderedDict()
 rooms['Entry'] = "You are standing in the grand entrance of the mansion."
