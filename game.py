@@ -69,10 +69,12 @@ class Game:
             self.player.move(user_input)
         elif user_input in ["Look", "L"]:
             self.player.look()
+        elif user_input in ["Options", "O"]:
+            self.player.options()
         elif user_input in ["Map", "M"]:
             self.print_map()
         elif user_input in ["Quit", "Q"]:
-            self.is_running = False
+            self._stop()
         else:
             print("sorry, there is no such action")
 
